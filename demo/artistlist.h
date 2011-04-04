@@ -23,7 +23,7 @@ class ArtistList : public QListWidget
             clear();
             //First search for artist bmatid
             setWindowTitle( "Searching " + m_artist + "..." );
-            QNetworkReply *reply = ella::Artist(m_artist).search();
+            QNetworkReply *reply = ella::Artist::search(m_artist);
             connect( reply, SIGNAL(finished()), this, SLOT(onSearch()));
         }
 
