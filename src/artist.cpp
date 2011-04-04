@@ -7,12 +7,12 @@
 
 using namespace ella;
 
-QNetworkReply* Artist::search(int limit) const
+QNetworkReply* Artist::search(const QString &query, int limit)
 {
     QString path = "/collections/bmat/artists/search";
 
     QMap<QString, QString> params;
-    params["q"] = m_name;
+    params["q"] = query;
     params["fetch_metadata"] = "artist";
     if (limit > 0) params["limit"] =  QString::number(limit);
 

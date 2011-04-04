@@ -23,11 +23,6 @@ namespace ella {
             {
             }
 
-            Artist(const QString &name)
-                : m_name(name)
-            {
-            }
-
             QString name() const
             {
                 return m_name;
@@ -38,7 +33,7 @@ namespace ella {
                 return m_bmatid;
             }
 
-            QNetworkReply* search( int limit = -1 ) const;
+            static QNetworkReply* search( const QString &query, int limit = -1 );
             static QList<Artist> list(QNetworkReply *);
 
             QNetworkReply* getSimilar() const;
