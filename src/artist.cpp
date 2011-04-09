@@ -37,7 +37,7 @@ QList<Artist> Artist::list(QNetworkReply *reply)
 
 QNetworkReply* Artist::getSimilar() const
 {
-    QString path = "/collections/bmat/artists/" + m_bmatid + "/similar/artists";
+    QString path = "/collections/bmat/artists/" + m_id + "/similar/artists";
     QMap<QString, QString> params;
     params["limit"] = "50";
     return ella::ws::get(path, params);
@@ -58,3 +58,20 @@ QMap<int, Artist> Artist::getSimilar(QNetworkReply *reply)
      return artists;
 }
 
+QNetworkReply* Artist::getSimilarTracks(Ella::SimilarityType type) const
+{
+    QString path = "/collections/bmat/artists/" + m_id + "/similar/tracks";
+    QMap<QString, QString> p;
+
+    QString t = Ella::similarityTypeToString(type);
+    if (!t.isEmpty()) p["similary_type"] = t;
+
+    p["limit"] = "50";
+
+    return ella::ws::get(path, p);
+}
+
+QMap<int, Track> Artist::getSimilarTracks(QNetworkReply *reply)
+{
+    return Track::getSimilar(reply);
+}

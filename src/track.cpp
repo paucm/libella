@@ -24,21 +24,10 @@ Track::Track(const QByteArray &id)
 QNetworkReply *Track::search(const SearchParams &params, int limit)
 {
     QString path = "/collections/bmat/tracks/search";
-    QString query;
-    
-    SearchParams::const_iterator iter = params.constBegin();
-    for(; iter < params.constEnd(); ++iter) {
-        if(!query.isEmpty()) {
-            query += " AND ";
-        }
-        query += QLatin1String(searchParamToString(iter->first));
-        query += ":";
-        query += iter->second.toString();
-    }
-    //query = query.replace(" ", "%20");
-
     QMap<QString, QString> p;
-    p["q"] = query;
+
+    QString query = searchParamsToQuery(params);
+    if (!query.isEmpty()) p["q"] = query;
     p["fetch_metadata"] = "track,artist,bmat_artist_id";
     if (limit > 0) p["limit"] =  QString::number(limit);
 
@@ -65,6 +54,62 @@ QList<Track> Track::list(QNetworkReply *reply)
     }
     return tracks;
 }
+
+QNetworkReply* Track::getSimilar(const SearchParams &params,
+                                 Ella::SimilarityType type) const
+{
+    QString path = "/collections/bmat/tracks/" + m_id + "/similar/tracks";
+    QMap<QString, QString> p;
+
+    QString query = searchParamsToQuery(params);
+    if (!query.isEmpty()) p["filter"] = query;
+
+    QString t = Ella::similarityTypeToString(type);
+    if (!t.isEmpty()) p["similary_type"] = t;
+
+    p["limit"] = "50";
+
+    return ella::ws::get(path, p);
+}
+
+QMap<int, Track> Track::getSimilar(QNetworkReply *reply)
+{
+    QMap<int, Track> tracks;
+    XmlQuery xml = ella::ws::parse(reply);
+    Q_FOREACH(XmlQuery q, xml.children("track")) {
+        QString id = q.attribute("id");
+        if (!id.isEmpty()) {
+            int const relevance = q["relevance"].text().toFloat() * 100;
+            XmlQuery ch = q.children("metadata")[0];
+            QString title = ch["track"].text();
+            QString artist = ch["artist"].text();
+            QString artistId = ch["bmat_artist_id"].text();
+            Track track(id.toLocal8Bit(),
+                        title,
+                        artistId.toLocal8Bit(),
+                        artist);
+            tracks.insertMulti(relevance, track);
+        }
+    }
+    return tracks;
+}
+
+QString Track::searchParamsToQuery(const SearchParams &params)
+{
+    QString query;
+    
+    SearchParams::const_iterator iter = params.constBegin();
+    for(; iter < params.constEnd(); ++iter) {
+        if(!query.isEmpty()) {
+            query += " AND ";
+        }
+        query += QLatin1String(searchParamToString(iter->first));
+        query += ":";
+        query += iter->second.toString();
+    }
+    return query;
+}
+
 
 QByteArray Track::searchParamToString(SearchParam param)
 {

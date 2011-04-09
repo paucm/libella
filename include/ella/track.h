@@ -8,6 +8,8 @@
 #include <QByteArray>
 #include <QVariant>
 
+#include <ella/ella.h>
+
 class QNetworkReply;
 
 namespace ella {
@@ -25,7 +27,6 @@ namespace ella {
               *  speed      QString [slow, medium, fast]
               *  mood       QString [blue, happy, furious, acoustic, party, relaxed]
               */
-
 
             enum SearchParam {
                 Title,
@@ -48,11 +49,15 @@ namespace ella {
             QByteArray artistId() const { return m_artistId; }
             QString artistName() const { return m_artistName; }
 
-            static QNetworkReply *search(const SearchParams &params, int limit=-1);
+            static QNetworkReply *search(const SearchParams &params = SearchParams(), int limit=-1);
             static QList<Track> list(QNetworkReply *);
 
-        private:
+            QNetworkReply* getSimilar(const SearchParams &params = SearchParams(),
+                                      Ella::SimilarityType type = Ella::Default) const;
+            static QMap<int, Track> getSimilar(QNetworkReply *);
 
+        private:
+            static QString searchParamsToQuery(const SearchParams &params);
             static QByteArray searchParamToString(SearchParam param);
 
             QByteArray m_id;
