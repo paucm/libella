@@ -23,17 +23,21 @@ Track::Track(const QByteArray &id)
 
 QNetworkReply *Track::search(const SearchParams &params, int limit)
 {
-    QString path = "/collections/bmat/tracks/search";
-    QMap<QString, QString> p;
-
     QString query = searchParamsToQuery(params);
-    if (!query.isEmpty()) p["q"] = query;
-    p["fetch_metadata"] = "track,artist,bmat_artist_id";
-    if (limit > 0) p["limit"] =  QString::number(limit);
-
-    return ella::ws::get(path, p);
+    return search(query, limit);
 }
  
+QNetworkReply *Track::search(const QString &query, int limit)
+{
+    QString path = "/collections/bmat/tracks/search";
+    QMap<QString, QString> params;
+    params["q"] = query;
+    params["fetch_metadata"] = "track,artist,bmat_artist_id";
+    if (limit > 0) params["limit"] =  QString::number(limit);
+
+    return ella::ws::get(path, params);
+}
+
 QList<Track> Track::list(QNetworkReply *reply)
 {
     QList<Track> tracks;
@@ -65,8 +69,9 @@ QNetworkReply* Track::getSimilar(const SearchParams &params,
     if (!query.isEmpty()) p["filter"] = query;
 
     QString t = Ella::similarityTypeToString(type);
-    if (!t.isEmpty()) p["similary_type"] = t;
+    if (!t.isEmpty()) p["similarity_type"] = t;
 
+    p["fetch_metadata"] = "track,artist,bmat_artist_id";
     p["limit"] = "50";
 
     return ella::ws::get(path, p);

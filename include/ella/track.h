@@ -50,6 +50,7 @@ namespace ella {
             QString artistName() const { return m_artistName; }
 
             static QNetworkReply *search(const SearchParams &params = SearchParams(), int limit=-1);
+            static QNetworkReply *search(const QString &query, int limit=-1);
             static QList<Track> list(QNetworkReply *);
 
             QNetworkReply* getSimilar(const SearchParams &params = SearchParams(),

@@ -64,8 +64,8 @@ QNetworkReply* Artist::getSimilarTracks(Ella::SimilarityType type) const
     QMap<QString, QString> p;
 
     QString t = Ella::similarityTypeToString(type);
-    if (!t.isEmpty()) p["similary_type"] = t;
-
+    if (!t.isEmpty()) p["similarity_type"] = t;
+    p["fetch_metadata"] = "track,artist,bmat_artist_id";
     p["limit"] = "50";
 
     return ella::ws::get(path, p);
