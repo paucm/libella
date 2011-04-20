@@ -1,13 +1,22 @@
 #include <QNetworkReply>
 #include <QLatin1String>
 
-#include "xmlquery.h"
+#include <ella/xmlquery.h>
 #include <ella/ws.h>
 #include <ella/track.h>
 
 using namespace ella;
 
-Track::Track(const QByteArray &id, const QString &title, 
+static QString fetch_metadata = "track,artist,bmat_artist_id,"
+                                "highlevel_moods_happy_probability_value,"
+                                "highlevel_moods_acoustic_probability_value,"
+                                "highlevel_moods_aggressive_probability_value,"
+                                "highlevel_moods_relaxed_probability_value,"
+                                "highlevel_moods_party_probability_value,"
+                                "highlevel_moods_sad_probability_value";
+
+
+Track::Track(const QByteArray &id, const QString &title,
              const QByteArray &artistId, const QString &artistName)
 {
     m_id = id;
@@ -15,7 +24,7 @@ Track::Track(const QByteArray &id, const QString &title,
     m_artistId = artistId;
     m_artistName = artistName;
 }
-            
+
 Track::Track(const QByteArray &id)
 {
     m_id = id;
@@ -26,13 +35,13 @@ QNetworkReply *Track::search(const SearchParams &params, int limit)
     QString query = searchParamsToQuery(params);
     return search(query, limit);
 }
- 
+
 QNetworkReply *Track::search(const QString &query, int limit)
 {
     QString path = "/collections/bmat/tracks/search";
     QMap<QString, QString> params;
     params["q"] = query;
-    params["fetch_metadata"] = "track,artist,bmat_artist_id";
+    params["fetch_metadata"] = fetch_metadata;
     if (limit > 0) params["limit"] =  QString::number(limit);
 
     return ella::ws::get(path, params);
@@ -45,15 +54,10 @@ QList<Track> Track::list(QNetworkReply *reply)
     Q_FOREACH(XmlQuery q, xml.children("track")) {
         QString id = q.attribute("id");
         if (!id.isEmpty()) {
-             XmlQuery ch = q.children("metadata")[0];
-             QString title = ch["track"].text();
-             QString artist = ch["artist"].text();
-             QString artistId = ch["bmat_artist_id"].text();
-             Track track(id.toLocal8Bit(), 
-                         title, 
-                         artistId.toLocal8Bit(), 
-                         artist);
-             tracks += track;
+            Track track(id.toLocal8Bit());
+            XmlQuery ch = q.children("metadata")[0];
+            parseMetadata(ch, track);
+            tracks += track;
         }
     }
     return tracks;
@@ -71,7 +75,7 @@ QNetworkReply* Track::getSimilar(const SearchParams &params,
     QString t = Ella::similarityTypeToString(type);
     if (!t.isEmpty()) p["similarity_type"] = t;
 
-    p["fetch_metadata"] = "track,artist,bmat_artist_id";
+    p["fetch_metadata"] = fetch_metadata;
     p["limit"] = "50";
 
     return ella::ws::get(path, p);
@@ -85,24 +89,55 @@ QMap<int, Track> Track::getSimilar(QNetworkReply *reply)
         QString id = q.attribute("id");
         if (!id.isEmpty()) {
             int const relevance = q["relevance"].text().toFloat() * 100;
+            Track track(id.toLocal8Bit());
             XmlQuery ch = q.children("metadata")[0];
-            QString title = ch["track"].text();
-            QString artist = ch["artist"].text();
-            QString artistId = ch["bmat_artist_id"].text();
-            Track track(id.toLocal8Bit(),
-                        title,
-                        artistId.toLocal8Bit(),
-                        artist);
+            parseMetadata(ch, track);
             tracks.insertMulti(relevance, track);
         }
     }
     return tracks;
 }
 
+void Track::parseMetadata(XmlQuery xml, Track &track)
+{
+    track.m_title = xml["track"].text();
+    track.m_artistName = xml["artist"].text();
+    track.m_artistId = xml["bmat_artist_id"].text().toLocal8Bit();
+
+    QMap<int, Ella::Mood> moods;
+    QString value = xml["highlevel_moods_happy_probability_value"].text();
+    float v = value.remove(0, 1).toFloat() * 100;
+    moods.insertMulti(v, Ella::Happy);
+
+    value = xml["highlevel_moods_acoustic_probability_value"].text();
+    v = value.remove(0, 1).toFloat() * 100;
+    moods.insertMulti(v, Ella::Acoustic);
+
+    value = xml["highlevel_moods_aggressive_probability_value"].text();
+    v = value.remove(0, 1).toFloat() * 100;
+    moods.insertMulti(v, Ella::Furious);
+
+    value = xml["highlevel_moods_relaxed_probability_value"].text();
+    v = value.remove(0, 1).toFloat() * 100;
+    moods.insertMulti(v, Ella::Relax);
+
+    value = xml["highlevel_moods_party_probability_value"].text();
+    v = value.remove(0, 1).toFloat() * 100;
+    moods.insertMulti(v, Ella::Party);
+
+    value = xml["highlevel_moods_sad_probability_value"].text();
+    v = value.remove(0, 1).toFloat() * 100;
+    moods.insertMulti(v, Ella::Blue);
+
+    track.m_moods = moods;
+}
+
+
+
 QString Track::searchParamsToQuery(const SearchParams &params)
 {
     QString query;
-    
+
     SearchParams::const_iterator iter = params.constBegin();
     for(; iter < params.constEnd(); ++iter) {
         if(!query.isEmpty()) {
@@ -110,11 +145,13 @@ QString Track::searchParamsToQuery(const SearchParams &params)
         }
         query += QLatin1String(searchParamToString(iter->first));
         query += ":";
-        query += iter->second.toString();
+        if (iter->first == Mood)
+            query += Ella::moodToString(iter->second.value<Ella::Mood>());
+        else
+            query += iter->second.toString();
     }
     return query;
 }
-
 
 QByteArray Track::searchParamToString(SearchParam param)
 {

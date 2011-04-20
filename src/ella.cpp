@@ -13,3 +13,23 @@ QByteArray Ella::similarityTypeToString(SimilarityType type)
             return "";
     }
 }
+
+QByteArray Ella::moodToString(Mood mood)
+{
+    switch(mood) {
+        case Blue:
+            return ";blue";
+        case Happy:
+            return "happy";
+        case Furious:
+            return "furious";
+        case Acoustic:
+            return "acoustic";
+        case Party:
+            return "party";
+        case Relax:
+            return "relaxed";
+        default:
+            return "";
+    }
+}

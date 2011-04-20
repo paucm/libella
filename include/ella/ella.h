@@ -2,6 +2,7 @@
 #define ELLA_H
 
 #include <QByteArray>
+#include <QMetaType>
 
 namespace ella {
 
@@ -15,7 +16,19 @@ namespace ella {
                 Playlist
             };
             static QByteArray similarityTypeToString(SimilarityType type);
+
+            enum Mood {
+                Blue,
+                Happy,
+                Furious,
+                Acoustic,
+                Party,
+                Relax
+            };
+            static QByteArray moodToString(Mood mood);
     };
 };
+
+Q_DECLARE_METATYPE(ella::Ella::Mood)
 
 #endif //ELLA_H

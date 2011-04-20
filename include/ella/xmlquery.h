@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Last.fm Ltd. 
+   Copyright 2009 Last.fm Ltd.
       - Primarily authored by Max Howell, Jono Cole and Doug Mansell
 
    ella is free software: you can redistribute it and/or modify
@@ -31,7 +31,6 @@ namespace ella
 
     public:
         XmlQuery( const QByteArray& );
-        
         XmlQuery( const QDomElement& e, const char* name = "" ) : e( e )
         {
             if (e.isNull()) qDebug("Expected node absent: %s", name);
@@ -40,7 +39,7 @@ namespace ella
         XmlQuery operator[]( const QString& name ) const;
         QString text() const { return e.text(); }
         QString attribute(const QString &name) const { return e.attribute(name); }
-        
+
         QList<XmlQuery> children( const QString& named ) const;
 
         operator QDomElement() const { return e; }

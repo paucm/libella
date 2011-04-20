@@ -17,7 +17,7 @@ SOURCES += ws.cpp \
            ella.cpp
 
 HEADERS += ../include/ella/ws.h \
-           xmlquery.cpp \
+           ../include/ella/xmlquery.h \
            ../include/ella/artist.h \
            ../include/ella/track.h \
            ../include/ella/tag.h \
