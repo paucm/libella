@@ -8,7 +8,8 @@
 #include <QByteArray>
 #include <QVariant>
 
-#include <ella/ella.h>
+#include <ella/util.h>
+#include <ella/artist.h>
 #include <ella/xmlquery.h>
 
 class QNetworkReply;
@@ -22,16 +23,16 @@ namespace ella {
               * The following are the various search parameters to the search() and similar() functions
               *
               *  Title      QString
-              *  Artist     QString
-              *  Artist_id  QByteArray
+              *  ArtistName QString
+              *  ArtistId   QByteArray
               *  Genre      QString
-              *  Speed      Ella::Speed
-              *  Mood       Ella::Mood
+              *  Speed      Util::Speed
+              *  Mood       Util::Mood
               */
 
             enum SearchParam {
                 Title,
-                Artist,
+                ArtistName,
                 ArtistId,
                 Genre,
                 Speed,
@@ -49,14 +50,25 @@ namespace ella {
 
             QByteArray artistId() const { return m_artistId; }
             QString artistName() const { return m_artistName; }
-            QMap<int, Ella::Mood> moods() const { return m_moods; }
 
-            static QNetworkReply *search(const SearchParams &params = SearchParams(), int limit=-1);
+            QMap<int, Util::Mood> moods() const { return m_moods; }
+
+            int bpm() const { return m_bpm; }
+            int year() const { return m_year; }
+
+            static QNetworkReply *search(
+                    const SearchParams &params = SearchParams(),
+                    int limit=-1);
             static QNetworkReply *search(const QString &query, int limit=-1);
             static QList<Track> list(QNetworkReply *);
 
-            QNetworkReply* getSimilar(const SearchParams &params = SearchParams(),
-                                      Ella::SimilarityType type = Ella::Default) const;
+            static QNetworkReply* getSimilar(
+                    const Artist &artist,
+                    const SearchParams &params = SearchParams(),
+                    Util::SimilarityType type = Util::Default);
+            QNetworkReply* getSimilar(
+                    const SearchParams &params = SearchParams(),
+                    Util::SimilarityType type = Util::Default) const;
             static QMap<int, Track> getSimilar(QNetworkReply *);
 
         private:
@@ -68,7 +80,9 @@ namespace ella {
             QString m_title;
             QByteArray m_artistId;
             QString m_artistName;
-            QMap<int, Ella::Mood> m_moods;
+            QMap<int, Util::Mood> m_moods;
+            int m_bpm;
+            int m_year;
     };
 }
 

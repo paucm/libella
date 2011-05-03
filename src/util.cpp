@@ -1,8 +1,8 @@
-#include <ella/ella.h>
+#include <ella/util.h>
 
 using namespace ella;
 
-QByteArray Ella::similarityTypeToString(SimilarityType type)
+QByteArray Util::similarityTypeToString(SimilarityType type)
 {
      switch(type) {
         case CollaborativeFiltering:
@@ -14,7 +14,7 @@ QByteArray Ella::similarityTypeToString(SimilarityType type)
     }
 }
 
-QByteArray Ella::moodToString(Mood mood)
+QByteArray Util::moodToString(Mood mood)
 {
     switch(mood) {
         case Blue:

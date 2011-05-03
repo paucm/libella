@@ -6,7 +6,7 @@
 
 namespace ella {
 
-    class Ella {
+    class Util {
 
         public:
 
@@ -29,6 +29,6 @@ namespace ella {
     };
 };
 
-Q_DECLARE_METATYPE(ella::Ella::Mood)
+Q_DECLARE_METATYPE(ella::Util::Mood)
 
 #endif //ELLA_H
