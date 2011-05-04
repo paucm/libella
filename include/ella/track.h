@@ -7,6 +7,7 @@
 #include <QPair>
 #include <QByteArray>
 #include <QVariant>
+#include <QStringList>
 
 #include <ella/util.h>
 #include <ella/artist.h>
@@ -55,6 +56,7 @@ namespace ella {
 
             int bpm() const { return m_bpm; }
             int year() const { return m_year; }
+            QStringList genres() const { return m_genres; }
 
             static QNetworkReply *search(
                     const SearchParams &params = SearchParams(),
@@ -83,6 +85,7 @@ namespace ella {
             QMap<int, Util::Mood> m_moods;
             int m_bpm;
             int m_year;
+            QStringList m_genres;
     };
 }
 

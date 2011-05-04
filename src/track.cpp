@@ -13,7 +13,7 @@ static QString fetch_metadata = "track,artist,bmat_artist_id,"
                                 "highlevel_moods_relaxed_probability_value,"
                                 "highlevel_moods_party_probability_value,"
                                 "highlevel_moods_sad_probability_value,"
-                                "rhythm_bpm_value,year";
+                                "rhythm_bpm_value,year,genre,track_genre";
 
 
 Track::Track(const QByteArray &id, const QString &title,
@@ -162,6 +162,18 @@ void Track::parseMetadata(XmlQuery xml, Track &track)
     value = xml["year"].text();
     if (!value.isEmpty())
         track.m_year = value.toInt();
+
+    Q_FOREACH(XmlQuery q, xml.children("genre")) {
+        if (!track.m_genres.contains(q.text())) {
+            track.m_genres << q.text();
+        }
+    }
+
+    Q_FOREACH(XmlQuery q, xml.children("track_genre")) {
+        if (!track.m_genres.contains(q.text())) {
+            track.m_genres << q.text();
+        }
+    }
 }
 
 QString Track::searchParamsToQuery(const SearchParams &params)
