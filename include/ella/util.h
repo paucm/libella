@@ -29,6 +29,5 @@ namespace ella {
     };
 };
 
-Q_DECLARE_METATYPE(ella::Util::Mood)
+#endif //UTIL_H
 
-#endif //ELLA_H

@@ -188,7 +188,7 @@ QString Track::searchParamsToQuery(const SearchParams &params)
         query += QLatin1String(searchParamToString(iter->first));
         query += ":";
         if (iter->first == Mood)
-            query += Util::moodToString(iter->second.value<Util::Mood>());
+            query += Util::moodToString(static_cast<Util::Mood>(iter->second.toInt()));
         else
             query += iter->second.toString();
     }

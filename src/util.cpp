@@ -18,7 +18,7 @@ QByteArray Util::moodToString(Mood mood)
 {
     switch(mood) {
         case Blue:
-            return ";blue";
+            return "blue";
         case Happy:
             return "happy";
         case Furious:
